@@ -37,10 +37,12 @@ VALID_ARTIFACTS = [ "transcript_aajson",
                     "transcript_mmif",
                     "transcript_text",
                     "transcript_webvtt",
+                    "transcript_srt",
                     "tpme_mmif",
                     "tpme_aajson",
                     "tpme_text",
-                    "tpme_webvtt" ]
+                    "tpme_webvtt",
+                    "tpme_srt" ]
 
 TPME_PROVIDER = "GBH Archives"
 
@@ -224,6 +226,20 @@ def run_post( item:dict,
 
         # create TPME for AAPB JSON transcript 
         artifact = "tpme_webvtt"
+        if artifact in artifacts:
+            write_out_tpme( tdict, artifact, item, cf, pp_params, ins )
+
+    # create transcript in SRT format
+    artifact = "transcript_srt"
+    if artifact in artifacts:
+        tr_fname = item["asset_id"] + "-transcript.srt"
+        tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
+        with open(tr_fpath, "w") as file:
+            file.write(tdict["transcript_srt"])
+        print(ins + "SRT transcript saved: " + tr_fpath)
+
+        # create TPME for SRT transcript 
+        artifact = "tpme_srt"
         if artifact in artifacts:
             write_out_tpme( tdict, artifact, item, cf, pp_params, ins )
 

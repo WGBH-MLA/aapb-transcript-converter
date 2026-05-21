@@ -84,10 +84,12 @@ def mmif_to_all( mmif_str:str,
       - item_id:  The item ID (derived from MMIF if no ID was passed inI)
       - transcript_aajson:  The transcript in AAPB Transcript JSON format
       - transcript_webvtt:  The transcript in WebVTT format
+      - transcript_srt:     The transcript in SRT format
       - transcript_text:  The transcript in plain text
       - tpme_mmif:  TPME metadata for the MMIF transcript passed in
       - tpme_aajson:  TPME metadata for the corresponding output transcript      
       - tpme_webvtt:  TPME metadata for the corresponding output transcript
+      - tpme_srt:     TPME metadata for the corresponding output transcript
       - tpme_text:   TPME metadata for the corresponding output transcript
       - problems:  A list of short messages of problems encountered
       - infos:  A list of short messages of other conditions noticed
@@ -216,6 +218,15 @@ def mmif_to_all( mmif_str:str,
                                              processing_note,
                                              prior_tpme_mmif )
 
+    tdict["tpme_srt"] = make_tpme_srt( tdict["item_id"], 
+                                       mmif_filename, 
+                                       tpme_provider, 
+                                       languages,
+                                       max_segment_chars,
+                                       max_line_chars,
+                                       processing_note,
+                                       prior_tpme_mmif )
+
     tdict["tpme_aajson"] = make_tpme_aajson( tdict["item_id"], 
                                              mmif_filename, 
                                              tpme_provider, 
@@ -237,6 +248,9 @@ def mmif_to_all( mmif_str:str,
 
     tdict["transcript_webvtt"] = make_transcript_webvtt( sts_arr,
                                                          max_line_chars )
+
+    tdict["transcript_srt"] = make_transcript_srt( sts_arr,
+                                                   max_line_chars )
 
     tdict["transcript_text"] = make_transcript_text( sts_arr )
 
@@ -306,6 +320,35 @@ def make_transcript_webvtt( sts_arr:list,
         cue_line = ms2str(st[0]) + " --> " + ms2str(st[1]) 
         text_lines = proc_asr.break_long_line(st[2], max_line_chars)
         text += ( cue_line + "\n" + text_lines + "\n\n" )
+
+    return text
+
+
+def make_transcript_srt( sts_arr:list,
+                          max_line_chars:int = 42,
+                          ) -> str:
+
+    def ms2str ( total_ms: int ) -> str:
+        # break time codes into components for SRT
+        ms = total_ms % 1000
+        total_seconds = total_ms // 1000
+        s = total_seconds % 60
+        total_minutes = total_seconds // 60
+        m = total_minutes % 60
+        h = total_minutes // 60
+
+        # observe SRT convention of always using hours digits and comma separator
+        timecode = f"{h:02d}:{m:02d}:{s:02d},{ms:03d}"  # HH:MM:SS,mmm
+        return timecode
+
+    # build one big string of text
+    text = ""
+    for i, st in enumerate(sts_arr):
+        # write out the cue counter, time cue, followed by the text
+        cue_num = str(i + 1)
+        cue_line = ms2str(st[0]) + " --> " + ms2str(st[1])
+        text_lines = proc_asr.break_long_line(st[2], max_line_chars)
+        text += ( cue_num + "\n" + cue_line + "\n" + text_lines + "\n\n" )
 
     return text
 
@@ -512,6 +555,47 @@ def make_tpme_webvtt( item_id:str,
     tpme["provider"] = tpme_provider
     tpme["type"] = "transcript"
     tpme["file_format"] = "text/vtt"
+    tpme["features"] = { "time_aligned": True, "max_segment_chars": max_segment_chars, "max_line_chars": max_line_chars }
+    tpme["transcript_language"] = languages
+    tpme["human_review_level"] = "machine-generated"
+    tpme["application_type"] = "format-conversion"
+    tpme["application_provider"] = "GBH Archives"
+    tpme["application_name"] = "aapb-transcript-converter"
+    tpme["application_version"] = __version__
+    tpme["application_repo"] = "https://github.com/WGBH-MLA/transcript_converter"
+    tpme["application_params"] = {"max_segment_chars": max_segment_chars, "max_line_chars": max_line_chars}
+    tpme["processing_note"] = processing_note
+    
+    tpmel = [tpme]
+    if prior_tpme:
+        tpmel = tpmel + prior_tpme
+
+    text = json.dumps(tpmel, indent=2)
+    return text
+
+
+
+def make_tpme_srt( item_id:str, 
+                    mmif_filename:str, 
+                    tpme_provider:str,
+                    languages:list[str],
+                    max_segment_chars:int,
+                    max_line_chars:int,
+                    processing_note:str,
+                    prior_tpme:list = None 
+                    ) -> str:
+    
+    # try to ensure a unique modification time
+    time.sleep(0.01)
+
+    tpme = {}
+    tpme["media_id"] = item_id
+    tpme["transcript_id"] = f"{item_id}-transcript.srt"
+    tpme["parent_transcript_id"] = mmif_filename
+    tpme["modification_date"] = datetime.now().isoformat()
+    tpme["provider"] = tpme_provider
+    tpme["type"] = "transcript"
+    tpme["file_format"] = "application/x-subrip"
     tpme["features"] = { "time_aligned": True, "max_segment_chars": max_segment_chars, "max_line_chars": max_line_chars }
     tpme["transcript_language"] = languages
     tpme["human_review_level"] = "machine-generated"

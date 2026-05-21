@@ -26,7 +26,7 @@ def main():
 
     app_desc = f"MMIF transcript_converter (version {__version__}). "
     app_desc += """
-Performs transcript conversion from MMIF to AAPB transcript JSON or WebVTT.
+Performs transcript conversion from MMIF to AAPB transcript JSON, WebVTT, or SRT.
 
 The transcript_converter package is primarily intended to be invoked by other 
 modules by importing it and calling the `mmif_to_all` function.  This CLI is
@@ -41,8 +41,10 @@ intended to be pretty basic.
 
     parser.add_argument("mmifpath", metavar="MMIF",
         help="Path to the source MMIF file")
-    parser.add_argument("-v", "--vtt", action="store_true",
+    parser.add_argument("--vtt", action="store_true",
         help="Output transcript in WebVTT instead of AAPB JSON")
+    parser.add_argument("--srt", action="store_true",
+        help="Output transcript in SRT instead of AAPB JSON")
     parser.add_argument("-m", "--tpme", action="store_true",
         help="Output TPME metadata sidecars for the transcripts produced")
     parser.add_argument("-s", "--max-seg-chars", type=int, default=DEFAULT_MAX_SEGMENT_CHARS,
@@ -85,7 +87,18 @@ intended to be pretty basic.
     item_id = tdict["item_id"]
 
     # write out file(s)
-    if args.vtt:
+    if args.srt:
+        # write out SRT
+        fname = item_id + "-transcript.srt"
+        with open(fname, "w") as file:
+            file.write(tdict["transcript_srt"])
+        if args.tpme:
+            dt = datetime.now()
+            tpme_ts = f"{dt.year:04d}{dt.month:02d}{dt.day:02d}-{dt.hour:02d}{dt.minute:02d}{dt.second:02d}-{dt.microsecond:06d}"
+            tpme_fname = f'{item_id}-tpme-{tpme_ts}.json'
+            with open(tpme_fname, "w") as file:
+                file.write(tdict["tpme_srt"])
+    elif args.vtt:
         # write out WebVTT
         fname = item_id + "-transcript.vtt"
         with open(fname, "w") as file:
