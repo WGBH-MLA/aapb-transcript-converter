@@ -69,7 +69,10 @@ def write_out_tpme( tdict:dict,
         dt = datetime.now()
 
     # identify the destination folder
-    tpme_dpath = cf["artifacts_dir"] + "/" + artifact
+    if cf.get("flat_dir"):
+        tpme_dpath = cf["artifacts_dir"] 
+    else:
+        tpme_dpath = cf["artifacts_dir"] + "/" + artifact 
 
     # check for stale TPME files, and remove if instructed
     tpme_fpath_pattern = os.path.join(tpme_dpath, f'{item["asset_id"]}-tpme-*.json' )
@@ -191,7 +194,10 @@ def run_post( item:dict,
     artifact = "transcript_mmif"
     if artifact in artifacts:
         mmif_tr_fname = item["asset_id"] + "-transcript.mmif"
-        mmif_tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + mmif_tr_fname
+        if cf.get("flat_dir"):
+            mmif_tr_fpath = cf["artifacts_dir"] + "/" + mmif_tr_fname    
+        else:
+            mmif_tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + mmif_tr_fname
         with open(mmif_tr_fpath, "w") as file:
             file.write(mmif_str)
         print(ins + "MMIF transcript saved: " + mmif_tr_fpath)
@@ -205,7 +211,10 @@ def run_post( item:dict,
     artifact = "transcript_aajson"
     if artifact in artifacts:
         tr_fname = item["asset_id"] + "-transcript.json"
-        tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
+        if cf.get("flat_dir"):
+            tr_fpath = cf["artifacts_dir"] + "/" + tr_fname    
+        else:
+            tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
         with open(tr_fpath, "w") as file:
             file.write(tdict["transcript_aajson"])
         print(ins + "AAPB-Transcript-JSON transcript saved: " + tr_fpath)
@@ -219,7 +228,10 @@ def run_post( item:dict,
     artifact = "transcript_webvtt"
     if artifact in artifacts:
         tr_fname = item["asset_id"] + "-transcript.vtt"
-        tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
+        if cf.get("flat_dir"):
+            tr_fpath = cf["artifacts_dir"] + "/" + tr_fname    
+        else:
+            tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
         with open(tr_fpath, "w") as file:
             file.write(tdict["transcript_webvtt"])
         print(ins + "WebVTT transcript saved: " + tr_fpath)
@@ -233,7 +245,10 @@ def run_post( item:dict,
     artifact = "transcript_srt"
     if artifact in artifacts:
         tr_fname = item["asset_id"] + "-transcript.srt"
-        tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
+        if cf.get("flat_dir"):
+            tr_fpath = cf["artifacts_dir"] + "/" + tr_fname    
+        else:
+            tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
         with open(tr_fpath, "w") as file:
             file.write(tdict["transcript_srt"])
         print(ins + "SRT transcript saved: " + tr_fpath)
@@ -247,7 +262,10 @@ def run_post( item:dict,
     artifact = "transcript_text"
     if artifact in artifacts:
         tr_fname = item["asset_id"] + "-transcript.txt"
-        tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
+        if cf.get("flat_dir"):
+            tr_fpath = cf["artifacts_dir"] + "/" + tr_fname    
+        else:
+            tr_fpath = cf["artifacts_dir"] + "/" + artifact + "/" + tr_fname
         with open( tr_fpath, "w" ) as file:
             file.write( tdict["transcript_text"] )
         print(ins + "Plain text transcript saved: " + tr_fpath)
