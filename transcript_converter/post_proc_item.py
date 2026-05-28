@@ -31,6 +31,7 @@ POSTPROC_DEFAULTS = { "name": None,
                       "artifacts": [],
                       "max_segment_chars": 110,
                       "max_line_chars": 42,
+                      "transcript_filename_suffix": "-transcript",
                       "remove_stale_tpme": True }
 
 VALID_ARTIFACTS = [ "transcript_aajson",
@@ -173,7 +174,7 @@ def run_post( item:dict,
     # Call the main conversion function
     tdict = mmif_to_all( mmif_str = mmif_str,
                          item_id = item["asset_id"],
-                         mmif_filename = f'{item["asset_id"]}-transcript.mmif',
+                         mmif_filename = f'{item["asset_id"]}{pp_params["transcript_filename_suffix"]}.mmif',
                          tpme_provider = TPME_PROVIDER,
                          max_segment_chars = pp_params["max_segment_chars"],
                          max_line_chars = pp_params["max_line_chars"],
@@ -193,7 +194,7 @@ def run_post( item:dict,
     # create transcript in MMIF format (as output by the CLAMS app)
     artifact = "transcript_mmif"
     if artifact in artifacts:
-        mmif_tr_fname = item["asset_id"] + "-transcript.mmif"
+        mmif_tr_fname = item["asset_id"] + pp_params['transcript_filename_suffix'] + ".mmif"
         if cf.get("flat_dir"):
             mmif_tr_fpath = cf["artifacts_dir"] + "/" + mmif_tr_fname    
         else:
@@ -210,7 +211,7 @@ def run_post( item:dict,
     # create transcript in AAPB JSON format
     artifact = "transcript_aajson"
     if artifact in artifacts:
-        tr_fname = item["asset_id"] + "-transcript.json"
+        tr_fname = item["asset_id"] + pp_params['transcript_filename_suffix'] + ".json"
         if cf.get("flat_dir"):
             tr_fpath = cf["artifacts_dir"] + "/" + tr_fname    
         else:
@@ -227,7 +228,7 @@ def run_post( item:dict,
     # create transcript in WebVTT format
     artifact = "transcript_webvtt"
     if artifact in artifacts:
-        tr_fname = item["asset_id"] + "-transcript.vtt"
+        tr_fname = item["asset_id"] + pp_params['transcript_filename_suffix'] + ".vtt"
         if cf.get("flat_dir"):
             tr_fpath = cf["artifacts_dir"] + "/" + tr_fname    
         else:
@@ -244,7 +245,7 @@ def run_post( item:dict,
     # create transcript in SRT format
     artifact = "transcript_srt"
     if artifact in artifacts:
-        tr_fname = item["asset_id"] + "-transcript.srt"
+        tr_fname = item["asset_id"] + pp_params['transcript_filename_suffix'] + ".srt"
         if cf.get("flat_dir"):
             tr_fpath = cf["artifacts_dir"] + "/" + tr_fname    
         else:
@@ -261,7 +262,7 @@ def run_post( item:dict,
     # create transcript in plain text format
     artifact = "transcript_text"
     if artifact in artifacts:
-        tr_fname = item["asset_id"] + "-transcript.txt"
+        tr_fname = item["asset_id"] + pp_params['transcript_filename_suffix'] + ".txt"
         if cf.get("flat_dir"):
             tr_fpath = cf["artifacts_dir"] + "/" + tr_fname    
         else:
