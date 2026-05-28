@@ -38,6 +38,7 @@ DEFAULT_TPME_PROVIDER = "unspecified"
 def mmif_to_all( mmif_str:str,
                  item_id:str = None,
                  mmif_filename:str = None,
+                 transcript_filename_suffix:str = "-transcript",
                  languages:list = [],
                  tpme_provider:str = DEFAULT_TPME_PROVIDER,
                  max_segment_chars:int = DEFAULT_MAX_SEGMENT_CHARS,
@@ -189,6 +190,7 @@ def mmif_to_all( mmif_str:str,
     tdict["tpme_mmif"] = make_tpme_mmif( asr_view, 
                                          tdict["item_id"], 
                                          mmif_filename, 
+                                         transcript_filename_suffix,
                                          tpme_provider, 
                                          languages,
                                          processing_note,
@@ -203,6 +205,7 @@ def mmif_to_all( mmif_str:str,
 
     tdict["tpme_text"] = make_tpme_text( tdict["item_id"], 
                                          mmif_filename, 
+                                         transcript_filename_suffix,
                                          tpme_provider,
                                          languages, 
                                          max_segment_chars,
@@ -211,6 +214,7 @@ def mmif_to_all( mmif_str:str,
 
     tdict["tpme_webvtt"] = make_tpme_webvtt( tdict["item_id"], 
                                              mmif_filename, 
+                                             transcript_filename_suffix,
                                              tpme_provider, 
                                              languages,
                                              max_segment_chars,
@@ -220,6 +224,7 @@ def mmif_to_all( mmif_str:str,
 
     tdict["tpme_srt"] = make_tpme_srt( tdict["item_id"], 
                                        mmif_filename, 
+                                       transcript_filename_suffix,
                                        tpme_provider, 
                                        languages,
                                        max_segment_chars,
@@ -229,6 +234,7 @@ def mmif_to_all( mmif_str:str,
 
     tdict["tpme_aajson"] = make_tpme_aajson( tdict["item_id"], 
                                              mmif_filename, 
+                                             transcript_filename_suffix,
                                              tpme_provider, 
                                              languages,
                                              max_segment_chars,
@@ -240,6 +246,9 @@ def mmif_to_all( mmif_str:str,
         embedded_tpme = json.loads(tdict["tpme_aajson"])
     else:
         embedded_tpme = None
+
+    # Transcript strings are constructed after TPME strings to support embedding
+    # the TPME strings in ceratin kinds of transcripts.
 
     tdict["transcript_aajson"] = make_transcript_aajson( sts_arr, 
                                                          tdict["item_id"], 
@@ -371,6 +380,7 @@ def make_transcript_text( sts_arr:list ) -> str:
 def make_tpme_mmif( asr_view:View, 
                     item_id:str, 
                     mmif_filename:str, 
+                    transcript_filename_suffix:str,
                     tpme_provider:str, 
                     languages:list[str],
                     processing_note:str,
@@ -495,7 +505,8 @@ def make_tpme_mmif( asr_view:View,
 
 
 def make_tpme_aajson( item_id:str, 
-                      mmif_filename:str, 
+                      mmif_filename:str,
+                      transcript_filename_suffix:str, 
                       tpme_provider:str,
                       languages:list[str],
                       max_segment_chars:int,
@@ -508,7 +519,7 @@ def make_tpme_aajson( item_id:str,
 
     tpme = {}
     tpme["media_id"] = item_id
-    tpme["transcript_id"] = f"{item_id}-transcript.json"
+    tpme["transcript_id"] = f"{item_id}{transcript_filename_suffix}.json"
     tpme["parent_transcript_id"] = mmif_filename
     tpme["modification_date"] = datetime.now().isoformat()
     tpme["provider"] = tpme_provider
@@ -536,6 +547,7 @@ def make_tpme_aajson( item_id:str,
 
 def make_tpme_webvtt( item_id:str, 
                       mmif_filename:str, 
+                      transcript_filename_suffix:str,
                       tpme_provider:str,
                       languages:list[str],
                       max_segment_chars:int,
@@ -549,7 +561,7 @@ def make_tpme_webvtt( item_id:str,
 
     tpme = {}
     tpme["media_id"] = item_id
-    tpme["transcript_id"] = f"{item_id}-transcript.vtt"
+    tpme["transcript_id"] = f"{item_id}{transcript_filename_suffix}.vtt"
     tpme["parent_transcript_id"] = mmif_filename
     tpme["modification_date"] = datetime.now().isoformat()
     tpme["provider"] = tpme_provider
@@ -577,6 +589,7 @@ def make_tpme_webvtt( item_id:str,
 
 def make_tpme_srt( item_id:str, 
                     mmif_filename:str, 
+                    transcript_filename_suffix:str,
                     tpme_provider:str,
                     languages:list[str],
                     max_segment_chars:int,
@@ -590,7 +603,7 @@ def make_tpme_srt( item_id:str,
 
     tpme = {}
     tpme["media_id"] = item_id
-    tpme["transcript_id"] = f"{item_id}-transcript.srt"
+    tpme["transcript_id"] = f"{item_id}{transcript_filename_suffix}.srt"
     tpme["parent_transcript_id"] = mmif_filename
     tpme["modification_date"] = datetime.now().isoformat()
     tpme["provider"] = tpme_provider
@@ -617,7 +630,8 @@ def make_tpme_srt( item_id:str,
 
 
 def make_tpme_text( item_id:str, 
-                    mmif_filename:str, 
+                    mmif_filename:str,
+                    transcript_filename_suffix:str, 
                     tpme_provider:str, 
                     languages:list[str],
                     max_segment_chars:int,                    
@@ -630,7 +644,7 @@ def make_tpme_text( item_id:str,
 
     tpme = {}
     tpme["media_id"] = item_id
-    tpme["transcript_id"] = f"{item_id}-transcript.txt"
+    tpme["transcript_id"] = f"{item_id}{transcript_filename_suffix}.txt"
     tpme["parent_transcript_id"] = mmif_filename
     tpme["modification_date"] = datetime.now().isoformat()
     tpme["provider"] = tpme_provider
