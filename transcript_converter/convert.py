@@ -30,6 +30,7 @@ from . import __version__
 from .known_apps import KNOWN_APPS
 from . import proc_asr
 from .proc_asr import DEFAULT_MAX_SEGMENT_CHARS, DEFAULT_MAX_LINE_CHARS
+from .stammer_hammer import blank_repeating_sequences
 
 # Other default values
 DEFAULT_TPME_PROVIDER = "unspecified"
@@ -127,8 +128,11 @@ def mmif_to_all( mmif_str:str,
         logging.warning("Encountered discontinuous sentences: " + str(issues["discontinuous_sentences_ids"]) )
         tdict["problems"].append("discontinuous_sentences_ids:" + str(issues["discontinuous_sentences_ids"]) )
 
+    # perform stammer-hammer
+    toks_arr = blank_repeating_sequences( toks_arr )
+
     # sanitize tokens array
-    toks_arr = proc_asr.sanitize_toks_arr ( toks_arr, max_segment_chars )
+    toks_arr = proc_asr.sanitize_toks_arr( toks_arr, max_segment_chars )
 
     # split (relabel) long segments, if appropriate
     try:
